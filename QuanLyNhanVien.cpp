@@ -43,7 +43,7 @@ void khoiTao(DanhSach &ds) {
     ds.a[1].namsinh = {20, 8, 1998};
     strcpy(ds.a[1].noisinh, "Da Nang");
     strcpy(ds.a[1].diachi, "456 Hai Chau");
-    ds.a[1].luong = 18000000;
+    ds.a[1].luong = 22000000;
     ds.a[1].ngayvao = {15, 3, 2021};
 
     // Nhan vien 3
@@ -53,7 +53,7 @@ void khoiTao(DanhSach &ds) {
     ds.a[2].namsinh = {10, 12, 1992};
     strcpy(ds.a[2].noisinh, "TP HCM");
     strcpy(ds.a[2].diachi, "789 Quan 1");
-    ds.a[2].luong = 22000000;
+    ds.a[2].luong = 18000000;
     ds.a[2].ngayvao = {20, 5, 2019};
 
     ds.n = 3; 
@@ -61,7 +61,7 @@ void khoiTao(DanhSach &ds) {
 
 // --- HAM HO TRO ---
 
-void xoaDem() {
+void xoaDem() {  
     int c;
     while ((c = getchar()) != '\n' && c != EOF);
 }
@@ -195,15 +195,29 @@ void sua1nv(NhanVien &nv, DanhSach ds) {
             case 2:
                 printf("Ngay sinh (dd/mm/yyyy): "); scanf("%d/%d/%d", &nv.namsinh.ngay, &nv.namsinh.thang, &nv.namsinh.nam);
                 break;
+            case 3:
+                printf("Noi sinh moi: "); fgets(nv.noisinh, sizeof(nv.noisinh), stdin); xoaXuongDong(nv.noisinh);
+                break;
+            case 4:
+                printf("Dia chi moi: "); fgets(nv.diachi, sizeof(nv.diachi), stdin); xoaXuongDong(nv.diachi);
+                break;
             case 5: nv.luong = nhapSoThuc("Luong moi: "); break;
+            case 6:
+                printf("Ngay vao lam (dd/mm/yyyy): "); scanf("%d/%d/%d", &nv.ngayvao.ngay, &nv.ngayvao.thang, &nv.ngayvao.nam);
+                break;
             case 7: 
                 printf("[Sua cho MSNV: %d]\n", nv.msnv);
                 printf("=> Ho moi: "); fgets(nv.ho, sizeof(nv.ho), stdin); xoaXuongDong(nv.ho);
                 printf("=> Ten moi: "); fgets(nv.ten, sizeof(nv.ten), stdin); xoaXuongDong(nv.ten);
+                printf("=> Ngay sinh (dd/mm/yyyy): "); scanf("%d/%d/%d", &nv.namsinh.ngay, &nv.namsinh.thang, &nv.namsinh.nam);
+                xoaDem();
+                printf("=> Noi sinh moi: "); fgets(nv.noisinh, sizeof(nv.noisinh), stdin); xoaXuongDong(nv.noisinh);
+                printf("=> Dia chi moi: "); fgets(nv.diachi, sizeof(nv.diachi), stdin); xoaXuongDong(nv.diachi);
                 nv.luong = nhapSoThuc("=> Luong moi: ");
+                printf("=> Ngay vao lam (dd/mm/yyyy): "); scanf("%d/%d/%d", &nv.ngayvao.ngay, &nv.ngayvao.thang, &nv.ngayvao.nam);
                 break;
             case 0: break;
-        }
+        } 
     } while(chon != 0);
 }
 
@@ -225,6 +239,19 @@ void sapXepLuong(DanhSach &ds) {
     printf("\n[OK] Da sap xep luong giam dan.\n");
 }
 
+void timMax(DanhSach ds) {
+    if(ds.n == 0) { printf("\n(!) Danh sach trong.\n"); return; }
+    float maxLuong = ds.a[0].luong;
+    for(int i = 1; i < ds.n; i++) {
+        if(ds.a[i].luong > maxLuong) maxLuong = ds.a[i].luong;
+    }
+    printf("\nCac nhan vien co luong cao nhat (%.2f VND):\n", maxLuong);
+    xuatTieuDe();
+    for(int i = 0; i < ds.n; i++) {
+        if(ds.a[i].luong == maxLuong) xuat1nv(ds.a[i]);
+    }
+}
+
 void xoaNhanVien(DanhSach &ds) {
     if(ds.n == 0) return;
     int msnv = nhapSoNguyen("Nhap MSNV can xoa: ");
@@ -238,9 +265,20 @@ void xoaNhanVien(DanhSach &ds) {
 }
 
 void hoiThoat() {
-    printf("\n[1] Ve Menu | [0] Thoat: ");
-    int chon = nhapSoNguyen("");
-    if (chon == 0) exit(0);
+    int chon;
+    while (1) {
+        printf("\n[1] Ve Menu | [0] Thoat: ");
+        chon = nhapSoNguyen(""); // Hàm này đã chặn nhập chữ rồi
+        
+        if (chon == 0) {
+            printf("Dang thoat chuong trinh...\n");
+            exit(0);
+        } else if (chon == 1) {
+            break; // Thoát vòng lặp while để quay về Menu
+        } else {
+            printf("[!] Loi: Chi duoc chon 0 hoac 1.\n");
+        }
+    }
 }
 
 void menu() {
@@ -275,6 +313,22 @@ void menu() {
                 pos = timMSNV(ds, msnv);
                 if(pos != -1) { xuatTieuDe(); xuat1nv(ds.a[pos]); sua1nv(ds.a[pos], ds); }
                 hoiThoat(); break;
+            case 5:
+                xoaDem(); // Xóa bộ nhớ đệm trước khi nhập chuỗi
+                printf("Nhap TEN can tim: ");
+                fgets(ten, sizeof(ten), stdin);
+                xoaXuongDong(ten);
+                
+                pos = timTen(ds, ten);
+                if(pos != -1) {
+                    xuatTieuDe();
+                    xuat1nv(ds.a[pos]);
+                    sua1nv(ds.a[pos], ds);
+                } else {
+                    printf("[!] Khong tim thay nhan vien co ten: %s\n", ten);
+                }
+                hoiThoat();
+                break;
             case 6: sapXepLuong(ds); xuatDanhSach(ds); hoiThoat(); break;
             case 7: xoaNhanVien(ds); hoiThoat(); break;
         }
